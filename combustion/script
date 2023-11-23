@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# combustion: network
+# shellcheck disable=1090,1091
+
+# Redirect output to the console
+exec > >(exec tee -a /dev/tty0) 2>&1
+
+set -xeuo pipefail
+
+source ./config
+
+scripts=(
+	'mounts'
+	'system'
+	'users'
+	'k3s'
+	# 'upgrade'
+)
+for fn in "${scripts[@]}"; do
+	source ./scripts/"${fn}.sh"
+done
+
+# Leave a marker
+echo "Configured with combustion" |
+	tee /etc/issue.d/combustion

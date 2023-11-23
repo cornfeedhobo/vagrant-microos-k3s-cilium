@@ -1,0 +1,24 @@
+[Unit]
+Description=Run K3s installer
+Wants=network-online.target
+After=network.target network-online.target
+ConditionPathExists=/usr/bin/k3s-install
+ConditionPathExists=!/usr/bin/k3s
+
+[Service]
+Type=forking
+TimeoutStartSec=120
+RemainAfterExit=yes
+KillMode=process
+Environment="INSTALL_K3S_BIN_DIR=/usr/bin"
+Environment="INSTALL_K3S_EXEC=server --write-kubeconfig-mode=600 --disable=traefik --flannel-backend=none --disable-network-policy --node-label=cilium.io/app=operator --disable-kube-proxy"
+Environment="INSTALL_K3S_SKIP_SELINUX_RPM=true"
+Environment="INSTALL_K3S_SKIP_START=true"
+Environment="INSTALL_K3S_VERSION=v1.26.10+k3s2"
+Environment="K3S_URL=https://a:6443"
+Environment="K3S_TOKEN=local"
+ExecStart=transactional-update run k3s-install
+ExecStartPost=bash -c 'sleep 10 && systemctl poweroff'
+
+[Install]
+WantedBy=multi-user.target
